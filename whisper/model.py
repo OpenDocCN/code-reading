@@ -62,7 +62,19 @@ def sinusoids(length, channels, max_timescale=10000):
     # 和 pos 相乘，得到 pos / MaxLen ** (2i / HidSize)
     scaled_time = torch.arange(length)[:, np.newaxis] * inv_timescales[np.newaxis, :]
     # 分别计算结果的 sin 和 cos，再按照 HidSize 的维度拼接
+    # 【好像有点问题】
     return torch.cat([torch.sin(scaled_time), torch.cos(scaled_time)], dim=1)
+
+'''
+def sinusoids_posemb(seq_len, hid_size, max_len=10000):
+    pos = torch.arange(seq_len)[:, None]
+    i = torch.arange(hid_size // 2)[None]
+    div_term =  torch.exp(-torch.log(max_len) * 2 * i / hid_size)
+    pe = torch.zeros([seq_len, hid_size])
+    pe[:, 0::2] = torch.sin(pos * div_term)
+    pe[:, 1::2] = torch.cos(pos * div_term)
+    return pe
+'''
 
 
 class MultiHeadAttention(nn.Module):
