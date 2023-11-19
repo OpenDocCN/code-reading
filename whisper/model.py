@@ -53,9 +53,15 @@ class Conv1d(nn.Conv1d):
 def sinusoids(length, channels, max_timescale=10000):
     """Returns sinusoids for positional embedding"""
     assert channels % 2 == 0
+    # 计算 log(MaxLen) * 2 / HidSize
     log_timescale_increment = np.log(max_timescale) / (channels // 2 - 1)
+    # 先将结果与 i 相乘，得到 log(MaxLen) * 2i / HidSize
+    # 然后计算 exp(-log(MaxLen) * 2i / HidSize) = 1 / MaxLen ** (2i / HidSize)
+    # 也就是除法项
     inv_timescales = torch.exp(-log_timescale_increment * torch.arange(channels // 2))
+    # 和 pos 相乘，得到 pos / MaxLen ** (2i / HidSize)
     scaled_time = torch.arange(length)[:, np.newaxis] * inv_timescales[np.newaxis, :]
+    # 分别计算结果的 sin 和 cos，再按照 HidSize 的维度拼接
     return torch.cat([torch.sin(scaled_time), torch.cos(scaled_time)], dim=1)
 
 
